@@ -30,6 +30,14 @@ describe('getRegistryCredentials', () => {
   const dockerDir = path.join(tempDir, '.docker');
   fs.mkdirSync(dockerDir, { recursive: true });
 
+  beforeAll(()=>{
+    const nodeModulePath = path.join(require.resolve('npm'), '..', '..');
+    const sourceFile = path.join(__dirname, '..', '..','hack', 'docker-credential-fake.js');
+    const targetLink = path.join(nodeModulePath, '.bin', 'docker-credential-fake');
+    !fs.existsSync(targetLink) &&
+    fs.symlinkSync(sourceFile, targetLink, 'file');
+  })
+
   beforeEach(() => {
     homedirSpy = jest.spyOn(os, 'homedir');
     homedirSpy.mockReturnValue(tempDir);
@@ -175,7 +183,7 @@ describe('getRegistryCredentials', () => {
 
     const dockerConfig = {
       credHelpers: {
-        [registryName]: "pwd"
+        [registryName]: "fake"
       }
     };
 
@@ -194,6 +202,28 @@ describe('getRegistryCredentials', () => {
     });
   });
 
+  describe('when credsStore exist', () => {
+    const username = 'username';
+    const password = 'password';
+
+    const dockerConfig = {
+      credsStore: "fake"
+    };
+
+    beforeEach(() => {
+      fs.writeFileSync(
+        path.join(tempDir, '.docker', 'config.json'),
+        JSON.stringify(dockerConfig),
+        {}
+      );
+    });
+
+    it('returns the credentials', () => {
+      const creds = getRegistryCredentials(imageName);
+
+      expect(creds).toEqual({ username, password });
+    });
+  });
 });
 
 

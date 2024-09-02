@@ -16,7 +16,7 @@ limitations under the License.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 import { parseImageName } from './name';
 
 export type Credentials = {
@@ -56,21 +56,33 @@ function credentialFromCredHelpers(dockerConfig: DockerConifg, registry: string)
   const helper = dockerConfig?.credHelpers?.[registry];
 
   if (!helper) {
-    //throw new Error(`No credentials found for registry ${registry}`);
     return null;
   }
 
+  return launchHelper(helper, registry);
+}
+
+function credentialFromCredsStore(dockerConfig: DockerConifg, registry: string) {
+  const helper = dockerConfig?.credsStore;
+
+  if (!helper) {
+    return null;
+  }
+
+  return launchHelper(helper, registry);
+}
+
+function launchHelper(helper: string, registry: string) {
   try {
-    //const output = execSync(`docker-credential-${helper} get`, {
-    //       input: JSON.stringify({ ServerURL: registry }),
-    const output = execSync(`pwd`, {
+    const output = execFileSync(`docker-credential-${helper}`, ["get"], {
+      input: registry,
     }).toString();
 
-    console.log(`output is ${output}`);
-    //return { username: creds.Username, password: creds.Secret };
-    return null;
+    const { Username: username, Secret: password } = JSON.parse(output);
+
+    return { username, password };
   } catch (err) {
-    throw new Error(`Failed to get credentials from helper ${helper} for registry ${registry}`);
+    throw new Error(`Failed to get credentials from helper ${helper} for registry ${registry}: ${err}`);
   }
 }
 
@@ -95,6 +107,10 @@ export const getRegistryCredentials = (imageName: string): Credentials => {
   const fromCredHelpers=credentialFromCredHelpers(dockerConfig, registry);
   if (fromCredHelpers) {
     return fromCredHelpers;
+  }
+  const fromCredsStore=credentialFromCredsStore(dockerConfig, registry);
+  if (fromCredsStore) {
+    return fromCredsStore;
   }
   throw new Error(`No credentials found for registry ${registry}`);
 };
