@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-
 process.stdin.setEncoding('utf8');
 
 let input = '';

@@ -30,12 +30,31 @@ describe('getRegistryCredentials', () => {
   const dockerDir = path.join(tempDir, '.docker');
   fs.mkdirSync(dockerDir, { recursive: true });
 
+
+  function findNodeModulesDir(startDir: string) {
+    let currentDir = startDir;
+
+    while (currentDir !== path.parse(currentDir).root) {
+      const nodeModulesPath = path.join(currentDir, 'node_modules');
+      if (fs.existsSync(nodeModulesPath)) {
+        return nodeModulesPath;
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    return null;
+  }
+
   beforeAll(()=>{
-    const nodeModulePath = path.join(require.resolve('typescript'), '..', '..');
+    const nodeModulePath = findNodeModulesDir(__dirname);
+    if (nodeModulePath === null) {
+      throw new Error('node_modules directory not found');
+    }
     const sourceFile = path.join(__dirname, '..', '..','hack', 'docker-credential-fake.js');
     const targetLink = path.join(nodeModulePath, '.bin', 'docker-credential-fake');
-    !fs.existsSync(targetLink) &&
-    fs.symlinkSync(sourceFile, targetLink, 'file');
+    if (!fs.existsSync(targetLink)) {
+      fs.symlinkSync(sourceFile, targetLink, 'file');
+    }
   })
 
   beforeEach(() => {
