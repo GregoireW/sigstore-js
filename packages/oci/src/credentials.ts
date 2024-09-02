@@ -39,7 +39,6 @@ function credentialFromAuths(dockerConfig: DockerConifg, registry: string) {
   const creds = dockerConfig?.auths?.[credKey];
 
   if (!creds) {
-    //throw new Error(`No credentials found for registry ${registry}`);
     return null;
   }
 
@@ -53,6 +52,7 @@ function credentialFromAuths(dockerConfig: DockerConifg, registry: string) {
 }
 
 function credentialFromCredHelpers(dockerConfig: DockerConifg, registry: string) {
+  // Check if the registry has a credHelper and use it if it does
   const helper = dockerConfig?.credHelpers?.[registry];
 
   if (!helper) {
@@ -63,6 +63,7 @@ function credentialFromCredHelpers(dockerConfig: DockerConifg, registry: string)
 }
 
 function credentialFromCredsStore(dockerConfig: DockerConifg, registry: string) {
+  // If the credsStore is set, use it to get the credentials
   const helper = dockerConfig?.credsStore;
 
   if (!helper) {
@@ -73,6 +74,9 @@ function credentialFromCredsStore(dockerConfig: DockerConifg, registry: string) 
 }
 
 function launchHelper(helper: string, registry: string) {
+  // Get the credentials from the helper.
+  // Parameter for helper is 'get' and registry is passed as input
+  // The helper should return a JSON object with the keys "Username" and "Secret"
   try {
     const output = execFileSync(`docker-credential-${helper}`, ["get"], {
       input: registry,

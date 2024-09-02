@@ -25,6 +25,8 @@ import {
 describe('getRegistryCredentials', () => {
   const registryName = 'my-registry';
   const imageName = `${registryName}/my-image`;
+  const badRegistryName = 'bad-registry';
+  const imageNameBadRegistry = `${badRegistryName}/my-image`;
   let homedirSpy: jest.SpyInstance<string, []> | undefined;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'get-reg-creds-'));
   const dockerDir = path.join(tempDir, '.docker');
@@ -195,6 +197,29 @@ describe('getRegistryCredentials', () => {
       expect(creds).toEqual({ username, password });
     });
   });
+
+  describe('when credHelper exit in error', () => {
+    const dockerConfig = {
+      credHelpers: {
+        [badRegistryName]: "fake"
+      }
+    };
+
+    beforeEach(() => {
+      fs.writeFileSync(
+        path.join(tempDir, '.docker', 'config.json'),
+        JSON.stringify(dockerConfig),
+        {}
+      );
+    });
+
+    it('throws an error', () => {
+      expect(() => getRegistryCredentials(imageNameBadRegistry)).toThrow(
+        /Failed to get credentials from helper fake for registry bad-registry/i
+      );
+    });
+  });
+
 
   describe('when credHelper exist for the registry', () => {
     const username = 'username';
