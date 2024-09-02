@@ -31,7 +31,7 @@ describe('getRegistryCredentials', () => {
   fs.mkdirSync(dockerDir, { recursive: true });
 
   beforeAll(()=>{
-    const nodeModulePath = path.join(require.resolve('npm'), '..', '..');
+    const nodeModulePath = path.join(require.resolve('typescript'), '..', '..');
     const sourceFile = path.join(__dirname, '..', '..','hack', 'docker-credential-fake.js');
     const targetLink = path.join(nodeModulePath, '.bin', 'docker-credential-fake');
     !fs.existsSync(targetLink) &&
