@@ -168,7 +168,34 @@ describe('getRegistryCredentials', () => {
       expect(creds).toEqual({ username, password });
     });
   });
+
+  describe('when credHelper exist for the registry', () => {
+    const username = 'username';
+    const password = 'password';
+
+    const dockerConfig = {
+      credHelpers: {
+        [registryName]: "pwd"
+      }
+    };
+
+    beforeEach(() => {
+      fs.writeFileSync(
+        path.join(tempDir, '.docker', 'config.json'),
+        JSON.stringify(dockerConfig),
+        {}
+      );
+    });
+
+    it('returns the credentials', () => {
+      const creds = getRegistryCredentials(imageName);
+
+      expect(creds).toEqual({ username, password });
+    });
+  });
+
 });
+
 
 describe('toBasicAuth', () => {
   const creds = { username: 'user', password: 'pass' };
