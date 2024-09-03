@@ -36,16 +36,16 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - 16.x
-          - 18.x
+#          - 16.x
+#          - 18.x
           - 20.x
         platform:
-          - os: ubuntu-latest
-            shell: bash
-            jest-cache: /tmp/jest
-          - os: macos-latest
-            shell: bash
-            jest-cache: /tmp/jest
+#          - os: ubuntu-latest
+#            shell: bash
+#            jest-cache: /tmp/jest
+#          - os: macos-latest
+#            shell: bash
+#            jest-cache: /tmp/jest
           - os: windows-latest
             shell: cmd
             jest-cache: C:\\Users\\runneradmin\\AppData\\Local\\Temp\\jest

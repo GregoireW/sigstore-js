@@ -52,11 +52,17 @@ describe('getRegistryCredentials', () => {
     if (nodeModulePath === null) {
       throw new Error('node_modules directory not found');
     }
-    const sourceFile = path.join(__dirname, '..', '..','hack', 'docker-credential-fake.js');
-    const targetLink = path.join(nodeModulePath, '.bin', 'docker-credential-fake');
-    if (!fs.existsSync(targetLink)) {
-      fs.symlinkSync(sourceFile, targetLink, 'file');
-    }
+    const files: {[file: string]: string} = {
+      "docker-credential-fake.js": "docker-credential-fake",
+      "docker-credential-fake.bat": "docker-credential-fake.bat"
+    };
+    Object.keys(files).forEach( (key) =>{
+      const sourceFile = path.join(__dirname, '..', '..','hack', key);
+      const targetLink = path.join(nodeModulePath, '.bin', files[key]);
+      if (!fs.existsSync(targetLink)) {
+        fs.symlinkSync(sourceFile, targetLink, 'file');
+      }
+    });
   })
 
   beforeEach(() => {
